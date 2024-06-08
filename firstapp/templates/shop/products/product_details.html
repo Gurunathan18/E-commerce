@@ -1,0 +1,127 @@
+{% extends 'shop/layouts/main.html' %}
+ {% block content %}
+ <section class="bg-light py-4 my-5" style="min-height:600px;">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-3">{{products}} Details</h4>
+                <hr style="border-color:#b8bfc2">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                      <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                      <li class="breadcrumb-item"><a href="{% url 'collections' products.catagory.name %}">collection</a></li>
+                      <li class="breadcrumb-item active" aria-current="page">{{products}}</li>
+                    </ol>
+                </nav>
+            </div>
+            <div class="col-3 my-3">
+             <img src="{{products.product_image.url}}" style="width:300px; height:255px" class="card-image-top" alt="{{products}}">
+            </div>
+            <div class="col-8 my-3">
+                <h5 class="text-success">{{products}}</h5>
+                <p>{{products.description}}</p>
+                <h6 class="my-1 mx-1">Current Price  :Rs.<s><span id="oldprice">{{products.originl_price}}</span></s></h6>
+                <h5 class="my-2" >Offer Price  :Rs.<span id="Price">{{products.selling_price}}</span></h5>
+                <div class="my-3">
+                    {% if products.quantity > 0 %}
+                    <input type="hidden" value="{{products.id}}" id="pid">
+                    <p> 
+                        <div class="input-group" style="width:150px">
+                            <button class="input-group-text bg-success text-light" id="btnMinus"><i class="fa fa-minus"></i></button>
+                            <input type="text" name="qty" id="txtQty" value="1" class="form-control text-center">
+                            <button class="input-group-text bg-success text-light" id="btnPlus"><i class="fa fa-plus"></i></button>                        
+                        </div>
+                    </p>
+                    {% if products.catagory.name == "Mobiles" %}
+                    <select id="ram" name="ram" class="border border-info">
+                        <option value='4gb' data-price="0">4GB</option>
+                        <option value='6gb'data-price="3000">6GB</option>
+                        <option value='8gb'data-price="5000">8GB</option>
+                    </select><br><br>
+                    {% endif %}
+
+                    <button class="btn btn-primary" id="btnCart"><i class="fa fa-shopping-cart"></i> Add To Cart</button>
+                    <button class="btn btn-success" onclick="return confirm('Are you sure ? want to Buy')" id="btnCart"> Buy</button>
+                    {%else%}
+                    <button class="btn btn-secondary"><i class="fa fa-minus"></i> Out of stack</button>
+                    {%endif%}
+                </div>
+            </div>
+    </div>
+    </div>
+</section>
+<script>
+    document.addEventListener("DOMContentLoaded",function(event){
+        const btnPlus = document.getElementById("btnPlus");
+        const btnMinus = document.getElementById("btnMinus");
+        const txtQty = document.getElementById("txtQty");
+        const pid = document.getElementById("pid");
+        const btnCart = document.getElementById("btnCart");
+
+
+        btnPlus.addEventListener("click",function(){
+            let qty=parseInt(txtQty.value,10);
+            qty=isNaN(qty)?0:qty;
+            if(qty<10){
+                qty++;
+                txtQty.value=qty;
+            }
+        });
+        btnMinus.addEventListener("click",function(){
+            let qty=parseInt(txtQty.value,10);
+            qty=isNaN(qty)?0:qty;
+            if(qty>1){
+                qty--;
+                txtQty.value=qty;
+            }
+        });
+        btnCart.addEventListener("click",function(){
+            let qty=parseInt(txtQty.value,10);
+            qty=isNaN(qty)?0:qty;
+            if(qty>0){
+                let postObj={
+                    'product_qty':qty,
+                    'pid': pid.value,
+                }
+                fetch("/addtocart",{
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers:{
+                        'Accept':'application/json',
+                        'X-Requested-With':'XMLHttpRequest',
+                        'X-CSRFToken':'{{ csrf_token }}',
+                    },
+                    body:JSON.stringify(postObj)
+                }).then(response => {
+                    return response.json();
+                }).then(data => {
+                       alert(data['status']);    
+                });
+            }
+                
+                else{
+                  alert(" Plese Enter tne Quantity");
+            }
+
+
+    });
+    })
+
+    const ram=document.getElementById("ram");
+    const pricedisplay=document.getElementById("Price");
+    const pricedisplay1=document.getElementById("oldprice");
+    const originalprice = parseInt(pricedisplay.textContent);
+    const originalprice1 = parseInt(pricedisplay1.textContent);
+    ram.addEventListener('change',() =>{
+        const selectedram=ram.options[ram.selectedIndex];
+        const price=parseInt(selectedram.getAttribute('data-price'));
+        const newprice = originalprice+price
+        const newprice1= originalprice1+price
+        pricedisplay.textContent = newprice;
+        pricedisplay1.textContent=newprice1;
+    });
+
+
+
+</script>
+ {% endblock content %}

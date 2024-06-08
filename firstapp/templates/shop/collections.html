@@ -1,0 +1,27 @@
+{% extends 'shop/layouts/main.html' %}
+ {% block content %}
+ <section class="bg-light py-4 my-5" style="margin-top:70px;">
+ <div class="container">
+    <div class="row">
+    <div class="col-12">
+        <h4 class="mb-3">Catagories</h4>
+        <hr style="border-color:#b8bfc2;">
+        {% include 'shop/inc/message.html' %}
+    </div>
+    {% for i in catagory%}
+    <div class="col-md-4 col-lg-3" >
+        <div class="card my-3">
+            <a href="{% url 'collections' i.name %}" style="text-decoration:none;">
+            <img src="{{i.image.url}}" class="card-image-top" alt="Catagories" style="width:10px;height:10px">
+            <div class="card-body">
+                <h5 class="card-title text-primary">{{i.name}}</h5>
+                <p class="card-text">{{i.description}}</p>
+            </div>
+        </a>
+        </div>
+    </div>
+    {% endfor %}
+    </div>
+ </div>
+ </section>
+ {% endblock content %}
